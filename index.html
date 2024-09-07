@@ -11,7 +11,6 @@
             margin: 0;
             padding: 0;
             transition: background-color 0.3s, color 0.3s;
-            user-select: none;
         }
         h1 {
             margin-top: 20px;
@@ -268,8 +267,8 @@
 
         function updateUI() {
             counterDisplay.textContent = counter;
-            upgrade1LevelDisplay.textContent = Уровень: ${upgrade1Level};
-            upgrade2LevelDisplay.textContent = Уровень: ${upgrade2Level};
+            upgrade1LevelDisplay.textContent = `Уровень: ${upgrade1Level}`;
+            upgrade2LevelDisplay.textContent = `Уровень: ${upgrade2Level}`;
             updateAchievements();
         }
 
@@ -377,3 +376,4 @@
     </script>
 </body>
 </html>
+
