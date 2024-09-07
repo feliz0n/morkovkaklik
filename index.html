@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Морковь кликер</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h1 {
+            margin-top: 20px;
+        }
+        #carrot-container {
+            margin-top: 50px;
+            font-size: 100px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #carrot-container:active {
+            transform: scale(0.9);
+        }
+        #counter {
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .shop-button, .achievements-button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 18px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .shop, .achievements {
+            margin-top: 30px;
+            display: none;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .item {
+            margin: 10px 0;
+        }
+        .item p {
+            margin: 5px 0;
+        }
+        .item button {
+            padding: 5px 10px;
+            font-size: 16px;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .item button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+        .item .level {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Темная тема */
+        body.dark-theme {
+            background-color: #2b2b2b;
+            color: #f0f8ff;
+        }
+        .dark-theme h1 {
+            color: #ffa07a;
+        }
+        .dark-theme .shop-button, .dark-theme .achievements-button {
+            background-color: #ff4500;
+        }
+        .dark-theme .shop-button:hover, .dark-theme .achievements-button:hover {
+            background-color: #ff6347;
+        }
+        .dark-theme .shop, .dark-theme .achievements {
+            background-color: #444;
+            border-color: #555;
+        }
+        .dark-theme .item button {
+            background-color: #4caf50;
+        }
+        .dark-theme .item button:hover {
+            background-color: #45a049;
+        }
+
+        /* Светлая тема */
+        body.light-theme {
+            background-color: #f0f8ff;
+            color: #000;
+        }
+        .light-theme h1 {
+            color: #ff6347;
+        }
+        .light-theme .shop-button, .light-theme .achievements-button {
+            background-color: #ff6347;
+        }
+        .light-theme .shop-button:hover, .light-theme .achievements-button:hover {
+            background-color: #ff4500;
+        }
+        .light-theme .shop, .light-theme .achievements {
+            background-color: #fff;
+            border-color: #ddd;
+        }
+        .light-theme .item button {
+            background-color: #4caf50;
+        }
+        .light-theme .item button:hover {
+            background-color: #45a049;
+        }
+
+        /* Переключатель темы */
+        #theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        /* Уведомления об ачивках */
+        .notification {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <div id="theme-toggle">🌞</div>
+    <h1>Кликни на морковь!</h1>
+    <div id="carrot-container">
+        🥕
+    </div>
+    <p>Кликов: <span id="counter">0</span></p>
+
+    <button class="shop-button" id="open-shop">Открыть магазин</button>
+    <button class="achievements-button" id="open-achievements">Ачивки</button>
+
+    <div class="shop" id="shop">
+        <h2>Магазин улучшений</h2>
+        <div class="item">
+            <p>Автоклик</p>
+            <button id="upgrade1">прокачать</button>
+            <div class="level" id="upgrade1-level">Уровень: 0</div>
+        </div>
+        <div class="item">
+            <p>+1 Клик за клик</p>
+            <button id="upgrade2">прокачать</button>
+            <div class="level" id="upgrade2-level">Уровень: 0</div>
+        </div>
+        <button class="shop-button" id="close-shop">Закрыть магазин</button>
+    </div>
+
+    <div class="achievements" id="achievements">
+        <h2>Ачивки</h2>
+        <div class="item">
+            <p>🥕 Клик - Набрать свой первый клик.</p>
+            <div class="level" id="achievement1-status">Статус: Не выполнено</div>
+        </div>
+        <div class="item">
+            <p>😎 Крутая морковь - Набрать 100 кликов.</p>
+            <div class="level" id="achievement2-status">Статус: Не выполнено</div>
+        </div>
+        <div class="item">
+            <p>😴 Отдых - Набрать 100 уровень автоклика.</p>
+            <div class="level" id="achievement3-status">Статус: Не выполнено</div>
+        </div>
+        <div class="item">
+            <p>⭐ Мегаморковь - Набрать 1000 кликов.</p>
+            <div class="level" id="achievement4-status">Статус: Не выполнено</div>
+        </div>
+        <div class="item">
+            <p>🥇 Поздравляю с прохождением игры - Набрать 100000 кликов.</p>
+            <div class="level" id="achievement5-status">Статус: Не выполнено</div>
+        </div>
+        <button class="shop-button" id="close-achievements">Закрыть ачивки</button>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let counter = 0;
+        let clickMultiplier = 1;
+        let clicksPerSecond = 0;
+        let upgrade1Level = 0;
+        let upgrade2Level = 0;
+
+        const carrotContainer = document.getElementById('carrot-container');
+        const counterDisplay = document.getElementById('counter');
+        const openShopButton = document.getElementById('open-shop');
+        const closeShopButton = document.getElementById('close-shop');
+        const shop = document.getElementById('shop');
+        const upgrade1Button = document.getElementById('upgrade1');
+        const upgrade2Button = document.getElementById('upgrade2');
+        const upgrade1LevelDisplay = document.getElementById('upgrade1-level');
+        const upgrade2LevelDisplay = document.getElementById('upgrade2-level');
+
+        const openAchievementsButton = document.getElementById('open-achievements');
+        const closeAchievementsButton = document.getElementById('close-achievements');
+        const achievements = document.getElementById('achievements');
+        const achievement1Status = document.getElementById('achievement1-status');
+        const achievement2Status = document.getElementById('achievement2-status');
+        const achievement3Status = document.getElementById('achievement3-status');
+        const achievement4Status = document.getElementById('achievement4-status');
+        const achievement5Status = document.getElementById('achievement5-status');
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const notification = document.getElementById('notification');
+
+        let autoClickInterval;
+
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function updateAchievements() {
+            if (counter >= 1 && achievement1Status.textContent.includes('Не выполнено')) {
+                achievement1Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 🥕 Клик!');
+            }
+            if (counter >= 100 && achievement2Status.textContent.includes('Не выполнено')) {
+                achievement2Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 😎 Крутая морковь!');
+            }
+            if (upgrade1Level >= 100 && achievement3Status.textContent.includes('Не выполнено')) {
+                achievement3Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 😴 Отдых!');
+            }
+            if (counter >= 1000 && achievement4Status.textContent.includes('Не выполнено')) {
+                achievement4Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: ⭐ Мегаморковь!');
+            }
+            if (counter >= 100000 && achievement5Status.textContent.includes('Не выполнено')) {
+                achievement5Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 🥇 Поздравляю с прохождением игры!');
+            }
+        }
+
+        function updateUI() {
+            counterDisplay.textContent = counter;
+            upgrade1LevelDisplay.textContent = `Уровень: ${upgrade1Level}`;
+            upgrade2LevelDisplay.textContent = `Уровень: ${upgrade2Level}`;
+            updateAchievements();
+        }
+
+        function loadGame() {
+            const savedData = JSON.parse(localStorage.getItem('carrotClickerData'));
+            if (savedData) {
+                counter = savedData.counter;
+                clickMultiplier = savedData.clickMultiplier;
+                clicksPerSecond = savedData.clicksPerSecond;
+                upgrade1Level = savedData.upgrade1Level;
+                upgrade2Level = savedData.upgrade2Level;
+                if (savedData.autoClickInterval) {
+                    startAutoClick();
+                }
+            }
+            updateUI();
+        }
+
+        function saveGame() {
+            const gameData = {
+                counter,
+                clickMultiplier,
+                clicksPerSecond,
+                upgrade1Level,
+                upgrade2Level,
+                autoClickInterval: autoClickInterval ? true : false
+            };
+            localStorage.setItem('carrotClickerData', JSON.stringify(gameData));
+        }
+
+        function startAutoClick() {
+            autoClickInterval = setInterval(() => {
+                counter += clicksPerSecond;
+                updateUI();
+                saveGame();
+            }, 1000);
+        }
+
+        function stopAutoClick() {
+            clearInterval(autoClickInterval);
+            autoClickInterval = null;
+        }
+
+        carrotContainer.addEventListener('click', () => {
+            counter += clickMultiplier;
+            updateUI();
+            saveGame();
+        });
+
+        upgrade1Button.addEventListener('click', () => {
+            if (counter >= 10 * (upgrade1Level + 1)) {
+                counter -= 10 * (upgrade1Level + 1);
+                upgrade1Level++;
+                clicksPerSecond++;
+                updateUI();
+                saveGame();
+                if (!autoClickInterval) {
+                    startAutoClick();
+                }
+            }
+        });
+
+        upgrade2Button.addEventListener('click', () => {
+            if (counter >= 5 * (upgrade2Level + 1)) {
+                counter -= 5 * (upgrade2Level + 1);
+                upgrade2Level++;
+                clickMultiplier++;
+                updateUI();
+                saveGame();
+            }
+        });
+
+        openShopButton.addEventListener('click', () => {
+            shop.style.display = 'block';
+        });
+
+        closeShopButton.addEventListener('click', () => {
+            shop.style.display = 'none';
+        });
+
+        openAchievementsButton.addEventListener('click', () => {
+            achievements.style.display = 'block';
+        });
+
+        closeAchievementsButton.addEventListener('click', () => {
+            achievements.style.display = 'none';
+        });
+
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                themeToggle.textContent = '🌜';
+            } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                themeToggle.textContent = '🌞';
+            }
+            saveGame();
+        });
+
+        window.addEventListener('beforeunload', saveGame);
+
+        loadGame();
+    </script>
+</body>
+</html>
+
