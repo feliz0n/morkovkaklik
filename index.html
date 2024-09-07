@@ -20,16 +20,10 @@
             margin-top: 50px;
             font-size: 100px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: inline-block;
-        }
-        #carrot-container:hover {
-            transform: scale(1.1);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
         }
         #carrot-container:active {
             transform: scale(0.9);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
         #counter {
             font-weight: bold;
@@ -137,7 +131,7 @@
         #theme-toggle {
             position: absolute;
             top: 10px;
-            left: 10px;
+            right: 10px;
             font-size: 30px;
             cursor: pointer;
         }
@@ -236,27 +230,12 @@
         const achievement5Status = document.getElementById('achievement5-status');
 
         const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
         const notification = document.getElementById('notification');
 
-        function updateAchievements() {
-            if (counter >= 1) {
-                achievement1Status.textContent = 'Статус: Выполнено';
-            }
-            if (counter >= 100) {
-                achievement2Status.textContent = 'Статус: Выполнено';
-            }
-            if (upgrade1Level >= 100) {
-                achievement3Status.textContent = 'Статус: Выполнено';
-            }
-            if (counter >= 1000) {
-                achievement4Status.textContent = 'Статус: Выполнено';
-            }
-            if (counter >= 100000) {
-                achievement5Status.textContent = 'Статус: Выполнено';
-            }
-        }
+        let autoClickInterval;
 
-        function displayNotification(message) {
+        function showNotification(message) {
             notification.textContent = message;
             notification.style.display = 'block';
             setTimeout(() => {
@@ -264,14 +243,103 @@
             }, 3000);
         }
 
-        function updateCounter() {
+        function updateAchievements() {
+            if (counter >= 1 && achievement1Status.textContent.includes('Не выполнено')) {
+                achievement1Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 🥕 Клик!');
+            }
+            if (counter >= 100 && achievement2Status.textContent.includes('Не выполнено')) {
+                achievement2Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 😎 Крутая морковь!');
+            }
+            if (upgrade1Level >= 100 && achievement3Status.textContent.includes('Не выполнено')) {
+                achievement3Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 😴 Отдых!');
+            }
+            if (counter >= 1000 && achievement4Status.textContent.includes('Не выполнено')) {
+                achievement4Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: ⭐ Мегаморковь!');
+            }
+            if (counter >= 100000 && achievement5Status.textContent.includes('Не выполнено')) {
+                achievement5Status.textContent = 'Статус: Выполнено';
+                alert('Вы получили ачивку: 🥇 Поздравляю с прохождением игры!');
+            }
+        }
+
+        function updateUI() {
             counterDisplay.textContent = counter;
+            upgrade1LevelDisplay.textContent = Уровень: ${upgrade1Level};
+            upgrade2LevelDisplay.textContent = Уровень: ${upgrade2Level};
             updateAchievements();
+        }
+
+        function loadGame() {
+            const savedData = JSON.parse(localStorage.getItem('carrotClickerData'));
+            if (savedData) {
+                counter = savedData.counter;
+                clickMultiplier = savedData.clickMultiplier;
+                clicksPerSecond = savedData.clicksPerSecond;
+                upgrade1Level = savedData.upgrade1Level;
+                upgrade2Level = savedData.upgrade2Level;
+                if (savedData.autoClickInterval) {
+                    startAutoClick();
+                }
+            }
+            updateUI();
+        }
+
+        function saveGame() {
+            const gameData = {
+                counter,
+                clickMultiplier,
+                clicksPerSecond,
+                upgrade1Level,
+                upgrade2Level,
+                autoClickInterval: autoClickInterval ? true : false
+            };
+            localStorage.setItem('carrotClickerData', JSON.stringify(gameData));
+        }
+
+        function startAutoClick() {
+            autoClickInterval = setInterval(() => {
+                counter += clicksPerSecond;
+                updateUI();
+                saveGame();
+            }, 1000);
+        }
+
+        function stopAutoClick() {
+            clearInterval(autoClickInterval);
+            autoClickInterval = null;
         }
 
         carrotContainer.addEventListener('click', () => {
             counter += clickMultiplier;
-            updateCounter();
+            updateUI();
+            saveGame();
+        });
+
+        upgrade1Button.addEventListener('click', () => {
+            if (counter >= 10 * (upgrade1Level + 1)) {
+                counter -= 10 * (upgrade1Level + 1);
+                upgrade1Level++;
+                clicksPerSecond++;
+                updateUI();
+                saveGame();
+                if (!autoClickInterval) {
+                    startAutoClick();
+                }
+            }
+        });
+
+        upgrade2Button.addEventListener('click', () => {
+            if (counter >= 5 * (upgrade2Level + 1)) {
+                counter -= 5 * (upgrade2Level + 1);
+                upgrade2Level++;
+                clickMultiplier++;
+                updateUI();
+                saveGame();
+            }
         });
 
         openShopButton.addEventListener('click', () => {
@@ -290,47 +358,22 @@
             achievements.style.display = 'none';
         });
 
-        upgrade1Button.addEventListener('click', () => {
-            if (counter >= 10) {
-                counter -= 10;
-                clicksPerSecond += 1;
-                upgrade1Level += 1;
-                upgrade1LevelDisplay.textContent = 'Уровень: ' + upgrade1Level;
-                updateCounter();
-                displayNotification('Автоклик улучшен до уровня ' + upgrade1Level);
-            } else {
-                alert('Недостаточно кликов!');
-            }
-        });
-
-        upgrade2Button.addEventListener('click', () => {
-            if (counter >= 20) {
-                counter -= 20;
-                clickMultiplier += 1;
-                upgrade2Level += 1;
-                upgrade2LevelDisplay.textContent = 'Уровень: ' + upgrade2Level;
-                updateCounter();
-                displayNotification('Множитель кликов улучшен до уровня ' + upgrade2Level);
-            } else {
-                alert('Недостаточно кликов!');
-            }
-        });
-
-        setInterval(() => {
-            counter += clicksPerSecond;
-            updateCounter();
-        }, 1000);
-
         themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            document.body.classList.toggle('light-theme');
-            if (document.body.classList.contains('dark-theme')) {
-                themeToggle.textContent = '🌙';
-                displayNotification('Ачивка "🌙 темная тема" получена!');
+            if (body.classList.contains('light-theme')) {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                themeToggle.textContent = '🌜';
             } else {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
                 themeToggle.textContent = '🌞';
             }
+            saveGame();
         });
+
+        window.addEventListener('beforeunload', saveGame);
+
+        loadGame();
     </script>
 </body>
 </html>
